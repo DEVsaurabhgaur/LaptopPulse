@@ -71,7 +71,7 @@ def _score_cpu_temp(
     if temp is None:
         # Unknown — neutral penalty: award 80% to avoid unfair punishment
         pts = int(weight * 0.80)
-        return pts, "N/A (LHM unavailable)"
+        return pts, "N/A (sensor unavailable)"
 
     h, w, u = bands["healthy"], bands["warn"], bands["urgent"]
     t = float(temp)

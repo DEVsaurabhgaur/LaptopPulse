@@ -74,18 +74,14 @@ def _collect_system_info() -> dict:
     except Exception:
         pass
 
-    # Log LHM availability at startup
+    # LHM is optional — ACPI WMI is the primary sensor method, no external software needed
     try:
         from core.sensors.lhm_bridge import is_lhm_available
         info["lhm_available"] = is_lhm_available()
         if info["lhm_available"]:
-            logger.info("LibreHardwareMonitor WMI bridge: ACTIVE")
+            logger.info("LibreHardwareMonitor WMI bridge: ACTIVE (optional enhancement)")
         else:
-            logger.warning(
-                "LibreHardwareMonitor not detected. "
-                "Run LHM as Administrator for accurate CPU/fan readings. "
-                "Falling back to WMI thermal zone."
-            )
+            logger.info("Running in standalone mode — Windows ACPI WMI sensors active.")
     except Exception:
         info["lhm_available"] = False
 

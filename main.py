@@ -156,6 +156,11 @@ def cmd_generate_test_report():
 
 
 def cmd_run_daemon():
+    try:
+        import pythoncom
+        pythoncom.CoInitialize()
+    except Exception:
+        pass
     from core.watcher import run_daemon
     run_daemon()
 

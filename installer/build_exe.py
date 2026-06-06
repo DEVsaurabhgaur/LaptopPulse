@@ -33,19 +33,34 @@ def build():
 
     cmd = [
         sys.executable, "-m", "PyInstaller",
-        "--onefile",                             # Single .exe
-        "--windowed",                            # No console window
+        "--onefile",
+        "--windowed",
+        "--uac-admin",
         "--name",        OUTPUT_NAME,
         "--distpath",    str(DIST_DIR),
         "--workpath",    str(BUILD_DIR),
         "--icon",        str(REPO_ROOT / "assets" / "icon.ico"),
+        # Include entire config folder (defaults.json + any future files)
         "--add-data",    f"{REPO_ROOT / 'config' / 'defaults.json'};config",
+        # Include dashboard HTML and tray assets
+        "--add-data",    f"{REPO_ROOT / 'ui' / 'dashboard.html'};ui",
+        "--add-data",    f"{REPO_ROOT / 'ui' / 'assets'};ui/assets",
+        # Hidden imports for Windows Service and tray
         "--hidden-import", "win32serviceutil",
         "--hidden-import", "win32service",
         "--hidden-import", "win32event",
         "--hidden-import", "servicemanager",
         "--hidden-import", "pystray",
+        "--hidden-import", "pystray._win32",
         "--hidden-import", "PIL",
+        "--hidden-import", "PIL.Image",
+        "--hidden-import", "flask",
+        "--hidden-import", "flask.templating",
+        "--hidden-import", "google.generativeai",
+        "--hidden-import", "cryptography",
+        "--hidden-import", "wmi",
+        "--hidden-import", "pythoncom",
+        "--hidden-import", "pywintypes",
         str(REPO_ROOT / "main.py"),
     ]
 
@@ -66,11 +81,6 @@ def build():
     print(f"\nBuild complete: {exe_path}")
     print(f"SHA-256: {sha256}")
     print(f"Hash saved: {hash_file}")
-    print("\nNext steps:")
-    print("  1. Test on a CLEAN Windows 11 VM (not your dev machine)")
-    print("  2. Sign with signtool.exe if you have a code signing cert")
-    print("  3. Run installer/build_installer.bat to create setup .exe via Inno Setup")
-    print("  4. Publish SHA-256 hash in GitHub Release notes")
 
 
 if __name__ == "__main__":
