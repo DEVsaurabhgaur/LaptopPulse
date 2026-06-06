@@ -1,0 +1,576 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>LaptopPulse — Dashboard</title>
+  <style>
+    /* ── Reset & base ───────────────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:        #0a0a0a;
+      --surface:   #111318;
+      --border:    #1e2330;
+      --accent:    #00d4ff;
+      --accent-dim:#0099bb;
+      --green:     #22c55e;
+      --yellow:    #f5c518;
+      --orange:    #f97316;
+      --red:       #ef4444;
+      --text:      #e2e8f0;
+      --muted:     #64748b;
+      --radius:    12px;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      font-size: 14px;
+      line-height: 1.5;
+      min-height: 100vh;
+    }
+
+    /* ── Layout ─────────────────────────────────────────────────────── */
+    .shell {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 0 1.5rem 3rem;
+    }
+
+    /* ── Header ─────────────────────────────────────────────────────── */
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 1.25rem 0;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 2rem;
+    }
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+    .logo-dot {
+      width: 10px; height: 10px;
+      border-radius: 50%;
+      background: var(--accent);
+      box-shadow: 0 0 8px var(--accent);
+    }
+    .logo h1 {
+      font-size: 1.1rem;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      color: var(--accent);
+    }
+    .logo span { color: var(--muted); font-weight: 400; font-size: 0.85rem; }
+    #refresh-status { font-size: 0.78rem; color: var(--muted); }
+
+    /* ── Hero row: score + ECG + metric cards ────────────────────────── */
+    .hero-row {
+      display: grid;
+      grid-template-columns: 220px 1fr;
+      gap: 1.25rem;
+      margin-bottom: 1.25rem;
+    }
+
+    /* Score card */
+    .score-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.5rem 1rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .score-label { font-size: 0.75rem; color: var(--muted); letter-spacing: 0.08em; text-transform: uppercase; }
+    .score-value {
+      font-size: 4.5rem;
+      font-weight: 800;
+      line-height: 1;
+      transition: color 0.4s;
+    }
+    .score-band {
+      font-size: 0.9rem;
+      font-weight: 600;
+      padding: 0.2rem 0.75rem;
+      border-radius: 999px;
+      background: rgba(0,212,255,0.12);
+      color: var(--accent);
+    }
+
+    /* ECG panel */
+    .ecg-panel {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.25rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+      overflow: hidden;
+      position: relative;
+    }
+    .ecg-title { font-size: 0.75rem; color: var(--muted); letter-spacing: 0.06em; text-transform: uppercase; }
+    .ecg-svg-wrap { flex: 1; display: flex; align-items: center; }
+    svg.ecg { width: 100%; height: 70px; overflow: visible; }
+    .ecg-path {
+      fill: none;
+      stroke: var(--accent);
+      stroke-width: 2px;
+      filter: drop-shadow(0 0 4px var(--accent));
+    }
+    .ecg-dot {
+      fill: var(--accent);
+      filter: drop-shadow(0 0 6px var(--accent));
+    }
+
+    /* ── Metric cards ────────────────────────────────────────────────── */
+    .metric-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 1rem;
+      margin-bottom: 1.25rem;
+    }
+    .metric-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1rem 1.1rem;
+      transition: border-color 0.3s;
+    }
+    .metric-card:hover { border-color: var(--accent-dim); }
+    .m-label { font-size: 0.72rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 0.35rem; }
+    .m-value { font-size: 1.9rem; font-weight: 700; line-height: 1; }
+    .m-unit  { font-size: 0.8rem; color: var(--muted); margin-left: 0.2rem; }
+    .m-sub   { font-size: 0.75rem; color: var(--muted); margin-top: 0.3rem; }
+
+    /* ── Score factors bar ───────────────────────────────────────────── */
+    .factors-panel {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.25rem;
+      margin-bottom: 1.25rem;
+    }
+    .factors-title { font-size: 0.75rem; color: var(--muted); letter-spacing: 0.06em; text-transform: uppercase; margin-bottom: 1rem; }
+    .factor-row { display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.6rem; }
+    .factor-name { width: 90px; font-size: 0.82rem; color: var(--muted); }
+    .factor-bar-wrap { flex: 1; height: 8px; background: var(--border); border-radius: 4px; overflow: hidden; }
+    .factor-bar { height: 100%; border-radius: 4px; transition: width 0.5s; background: var(--accent); }
+    .factor-pts  { width: 55px; text-align: right; font-size: 0.82rem; font-weight: 600; color: var(--text); }
+    .factor-detail { font-size: 0.75rem; color: var(--muted); margin-left: 90px; margin-top: -0.3rem; margin-bottom: 0.4rem; }
+
+    /* ── Bottom panels ───────────────────────────────────────────────── */
+    .panels-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.25rem;
+    }
+    .panel {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.25rem;
+    }
+    .panel-title {
+      font-size: 0.75rem;
+      color: var(--muted);
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      margin-bottom: 1rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .badge {
+      font-size: 0.7rem;
+      padding: 0.15rem 0.5rem;
+      border-radius: 999px;
+      background: rgba(0,212,255,0.12);
+      color: var(--accent);
+    }
+
+    /* Alerts table */
+    .alert-list { display: flex; flex-direction: column; gap: 0.5rem; }
+    .alert-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.65rem;
+      padding: 0.6rem 0.75rem;
+      border-radius: 8px;
+      background: rgba(255,255,255,0.02);
+      border-left: 3px solid transparent;
+      font-size: 0.82rem;
+    }
+    .alert-item.IMMEDIATE, .alert-item.URGENT { border-left-color: var(--red); }
+    .alert-item.WARN   { border-left-color: var(--yellow); }
+    .alert-item.INFO   { border-left-color: var(--accent); }
+    .sev-dot {
+      width: 8px; height: 8px; border-radius: 50%;
+      flex-shrink: 0; margin-top: 3px;
+    }
+    .IMMEDIATE .sev-dot, .URGENT .sev-dot { background: var(--red); }
+    .WARN .sev-dot   { background: var(--yellow); }
+    .INFO .sev-dot   { background: var(--accent); }
+    .alert-body { flex: 1; }
+    .alert-title { font-weight: 600; color: var(--text); }
+    .alert-time  { font-size: 0.72rem; color: var(--muted); margin-top: 0.15rem; }
+    .empty-state { color: var(--muted); font-size: 0.82rem; padding: 0.5rem 0; }
+
+    /* Reports list */
+    .report-list { display: flex; flex-direction: column; gap: 0.5rem; }
+    .report-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0.6rem 0.75rem;
+      border-radius: 8px;
+      background: rgba(255,255,255,0.02);
+      font-size: 0.82rem;
+    }
+    .report-item a {
+      color: var(--accent);
+      text-decoration: none;
+      font-weight: 500;
+    }
+    .report-item a:hover { text-decoration: underline; }
+    .report-date { font-size: 0.72rem; color: var(--muted); }
+
+    /* ── Color utilities ─────────────────────────────────────────────── */
+    .c-green  { color: var(--green);  }
+    .c-yellow { color: var(--yellow); }
+    .c-orange { color: var(--orange); }
+    .c-red    { color: var(--red);    }
+    .c-accent { color: var(--accent); }
+
+    /* ── Responsive ──────────────────────────────────────────────────── */
+    @media (max-width: 800px) {
+      .hero-row     { grid-template-columns: 1fr; }
+      .metric-grid  { grid-template-columns: repeat(2, 1fr); }
+      .panels-row   { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 480px) {
+      .metric-grid  { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+<div class="shell">
+
+  <!-- Header -->
+  <header>
+    <div class="logo">
+      <div class="logo-dot" id="live-dot"></div>
+      <h1>LaptopPulse <span>/ Dashboard</span></h1>
+    </div>
+    <div id="refresh-status">Connecting…</div>
+  </header>
+
+  <!-- Hero: score + ECG -->
+  <div class="hero-row">
+    <div class="score-card">
+      <div class="score-label">Health Score</div>
+      <div class="score-value c-accent" id="score-value">—</div>
+      <div class="score-band" id="score-band">Loading…</div>
+      <div class="m-sub" id="score-updated" style="margin-top:0.75rem"></div>
+    </div>
+
+    <div class="ecg-panel">
+      <div class="ecg-title">Live Signal</div>
+      <div class="ecg-svg-wrap">
+        <svg class="ecg" viewBox="0 0 700 70" preserveAspectRatio="none">
+          <path class="ecg-path" id="ecg-path" d=""/>
+          <circle class="ecg-dot" id="ecg-dot" r="4" cx="0" cy="35"/>
+        </svg>
+      </div>
+    </div>
+  </div>
+
+  <!-- Metric cards -->
+  <div class="metric-grid">
+    <div class="metric-card">
+      <div class="m-label">CPU Temp</div>
+      <div class="m-value" id="m-cpu">—<span class="m-unit">°C</span></div>
+      <div class="m-sub" id="m-cpu-sub">Waiting…</div>
+    </div>
+    <div class="metric-card">
+      <div class="m-label">GPU Temp</div>
+      <div class="m-value" id="m-gpu">—<span class="m-unit">°C</span></div>
+      <div class="m-sub" id="m-gpu-sub">Waiting…</div>
+    </div>
+    <div class="metric-card">
+      <div class="m-label">Fan Speed</div>
+      <div class="m-value" id="m-fan">—<span class="m-unit">RPM</span></div>
+      <div class="m-sub" id="m-fan-sub">Waiting…</div>
+    </div>
+    <div class="metric-card">
+      <div class="m-label">Battery</div>
+      <div class="m-value" id="m-bat">—<span class="m-unit">%</span></div>
+      <div class="m-sub" id="m-bat-sub">Waiting…</div>
+    </div>
+  </div>
+
+  <!-- Score factors -->
+  <div class="factors-panel">
+    <div class="factors-title">Score Breakdown</div>
+    <div id="factors-content">
+      <div class="factor-row">
+        <div class="factor-name">CPU Temp</div>
+        <div class="factor-bar-wrap"><div class="factor-bar" id="bar-cpu" style="width:0%"></div></div>
+        <div class="factor-pts" id="pts-cpu">—/40</div>
+      </div>
+      <div class="factor-detail" id="det-cpu"></div>
+
+      <div class="factor-row">
+        <div class="factor-name">Fan RPM</div>
+        <div class="factor-bar-wrap"><div class="factor-bar" id="bar-fan" style="width:0%"></div></div>
+        <div class="factor-pts" id="pts-fan">—/25</div>
+      </div>
+      <div class="factor-detail" id="det-fan"></div>
+
+      <div class="factor-row">
+        <div class="factor-name">Battery</div>
+        <div class="factor-bar-wrap"><div class="factor-bar" id="bar-bat" style="width:0%"></div></div>
+        <div class="factor-pts" id="pts-bat">—/20</div>
+      </div>
+      <div class="factor-detail" id="det-bat"></div>
+
+      <div class="factor-row">
+        <div class="factor-name">Throttle</div>
+        <div class="factor-bar-wrap"><div class="factor-bar" id="bar-thr" style="width:0%"></div></div>
+        <div class="factor-pts" id="pts-thr">—/15</div>
+      </div>
+      <div class="factor-detail" id="det-thr"></div>
+    </div>
+  </div>
+
+  <!-- Bottom panels: Alerts + Reports -->
+  <div class="panels-row">
+    <div class="panel">
+      <div class="panel-title">
+        Recent Alerts
+        <span class="badge" id="alert-count">0</span>
+      </div>
+      <div class="alert-list" id="alert-list">
+        <div class="empty-state">No alerts recorded.</div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-title">
+        Generated Reports
+        <span class="badge" id="report-count">0</span>
+      </div>
+      <div class="report-list" id="report-list">
+        <div class="empty-state">No reports generated yet.</div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /shell -->
+
+<script>
+/* ── ECG animation ──────────────────────────────────────────────────────── */
+(function() {
+  const W = 700, H = 70, MID = H / 2;
+  const STEP = 4, POINTS = Math.ceil(W / STEP) + 2;
+  // One full ECG cycle: flat → P → flat → QRS complex → T → flat
+  const cycle = [
+    0,0,0,0,0,0,0,0,0,0,
+    -4,-7,-4,0,
+    0,0,0,0,
+    2, -10, 30, -12, 2,
+    0,0,
+    -5,-8,-5,0,
+    0,0,0,0,0,0,0,0,0,0,0,0
+  ];
+  const CL = cycle.length;
+  const path = document.getElementById('ecg-path');
+  const dot  = document.getElementById('ecg-dot');
+  const buf  = new Array(POINTS).fill(0);
+  let   tick = 0;
+
+  function frame() {
+    buf.push(cycle[tick % CL]);
+    if (buf.length > POINTS) buf.shift();
+    tick++;
+    let d = '';
+    for (let i = 0; i < buf.length; i++) {
+      const x = i * STEP;
+      const y = MID + buf[i];
+      d += (i === 0 ? 'M' : 'L') + x.toFixed(1) + ',' + y.toFixed(1);
+    }
+    path.setAttribute('d', d);
+    const lastX = (buf.length - 1) * STEP;
+    const lastY = MID + buf[buf.length - 1];
+    dot.setAttribute('cx', lastX);
+    dot.setAttribute('cy', lastY);
+    requestAnimationFrame(frame);
+  }
+  requestAnimationFrame(frame);
+})();
+
+/* ── Color helpers ──────────────────────────────────────────────────────── */
+const BAND_COLOR = {
+  'Healthy':         'c-green',
+  'Monitor':         'c-yellow',
+  'Service Soon':    'c-orange',
+  'Action Required': 'c-red',
+};
+const SEV_COLORS = { IMMEDIATE:'c-red', URGENT:'c-red', WARN:'c-yellow', INFO:'c-accent' };
+
+function setScoreColor(band) {
+  const el = document.getElementById('score-value');
+  el.className = 'score-value ' + (BAND_COLOR[band] || 'c-accent');
+}
+
+function fmtTime(iso) {
+  if (!iso) return '';
+  try {
+    const d = new Date(iso);
+    return d.toLocaleDateString(undefined, {month:'short', day:'numeric'}) +
+           ' ' + d.toLocaleTimeString(undefined, {hour:'2-digit', minute:'2-digit'});
+  } catch(e) { return iso; }
+}
+
+function fmtVal(v, fallback) {
+  return (v === null || v === undefined) ? fallback : v;
+}
+
+/* ── Status update ──────────────────────────────────────────────────────── */
+function applyStatus(s) {
+  // Score
+  const score = fmtVal(s.health_score, '—');
+  document.getElementById('score-value').textContent = score;
+  const band  = fmtVal(s.health_band, 'Unknown');
+  document.getElementById('score-band').textContent  = band;
+  setScoreColor(band);
+  document.getElementById('score-updated').textContent =
+    s.updated_at ? 'Updated ' + fmtTime(s.updated_at) : '';
+
+  // Metric cards
+  const cpu = s.cpu_temp;
+  const cpuEl = document.getElementById('m-cpu');
+  cpuEl.innerHTML = (cpu != null ? cpu.toFixed(1) : '—') + '<span class="m-unit">°C</span>';
+  cpuEl.className = 'm-value ' + (cpu >= 90 ? 'c-red' : cpu >= 80 ? 'c-orange' : cpu >= 70 ? 'c-yellow' : 'c-green');
+  document.getElementById('m-cpu-sub').textContent = s.is_throttling ? 'Throttling' : '';
+
+  const gpu = s.gpu_temp;
+  const gpuEl = document.getElementById('m-gpu');
+  gpuEl.innerHTML = (gpu != null ? gpu.toFixed(1) : '—') + '<span class="m-unit">°C</span>';
+  gpuEl.className = 'm-value ' + (gpu >= 88 ? 'c-red' : gpu >= 78 ? 'c-orange' : gpu >= 70 ? 'c-yellow' : 'c-green');
+
+  const fan = s.fan_rpm;
+  const fanEl = document.getElementById('m-fan');
+  fanEl.innerHTML = (fan != null ? fan : '—') + '<span class="m-unit">RPM</span>';
+  fanEl.className = 'm-value ' + (fan < 200 ? 'c-red' : fan < 800 ? 'c-yellow' : 'c-green');
+
+  const bat = s.battery_pct;
+  const batEl = document.getElementById('m-bat');
+  batEl.innerHTML = (bat != null ? bat.toFixed(0) : '—') + '<span class="m-unit">%</span>';
+  batEl.className = 'm-value ' + (bat < 20 ? 'c-red' : bat < 40 ? 'c-yellow' : 'c-green');
+  const bh = s.battery_health;
+  document.getElementById('m-bat-sub').textContent = bh != null ? bh.toFixed(0) + '% health' : '';
+
+  // Score factors
+  const f = typeof s.score_factors === 'string'
+    ? JSON.parse(s.score_factors || '{}')
+    : (s.score_factors || {});
+
+  function renderFactor(key, barId, ptsId, detId) {
+    const d = f[key];
+    if (!d) return;
+    const pct = d.max > 0 ? Math.round(d.points / d.max * 100) : 0;
+    document.getElementById(barId).style.width = pct + '%';
+    document.getElementById(ptsId).textContent = d.points + '/' + d.max;
+    document.getElementById(detId).textContent = d.detail || '';
+  }
+  renderFactor('cpu_temp', 'bar-cpu', 'pts-cpu', 'det-cpu');
+  renderFactor('fan_rpm',  'bar-fan', 'pts-fan', 'det-fan');
+  renderFactor('battery',  'bar-bat', 'pts-bat', 'det-bat');
+  renderFactor('throttle', 'bar-thr', 'pts-thr', 'det-thr');
+}
+
+/* ── Alerts update ──────────────────────────────────────────────────────── */
+function applyAlerts(alerts) {
+  const list = document.getElementById('alert-list');
+  document.getElementById('alert-count').textContent = alerts.length;
+  if (!alerts.length) {
+    list.innerHTML = '<div class="empty-state">No alerts recorded — your laptop is healthy.</div>';
+    return;
+  }
+  list.innerHTML = alerts.slice(0, 12).map(a => `
+    <div class="alert-item ${a.severity || ''}">
+      <div class="sev-dot"></div>
+      <div class="alert-body">
+        <div class="alert-title">${a.title || a.rule_id}</div>
+        <div class="alert-time">${fmtTime(a.timestamp)}</div>
+      </div>
+    </div>
+  `).join('');
+}
+
+/* ── Reports update ─────────────────────────────────────────────────────── */
+function applyReports(reports) {
+  const list = document.getElementById('report-list');
+  document.getElementById('report-count').textContent = reports.length;
+  if (!reports.length) {
+    list.innerHTML = '<div class="empty-state">No reports generated yet.</div>';
+    return;
+  }
+  list.innerHTML = reports.slice(0, 8).map(r => {
+    const fname = r.path ? r.path.split(/[/\\]/).pop() : 'report.html';
+    const link  = r.exists ? `/api/report/${fname}` : '#';
+    return `
+      <div class="report-item">
+        <a href="${link}" target="_blank">${r.alert_rule || fname}</a>
+        <div class="report-date">${fmtTime(r.generated_at)}</div>
+      </div>`;
+  }).join('');
+}
+
+/* ── Polling loop ───────────────────────────────────────────────────────── */
+let refreshInterval = 15;
+let errorCount      = 0;
+
+async function fetchAll() {
+  try {
+    const [statusRes, alertsRes, reportsRes] = await Promise.all([
+      fetch('/api/status'),
+      fetch('/api/alerts'),
+      fetch('/api/reports'),
+    ]);
+    const status  = await statusRes.json();
+    const alerts  = await alertsRes.json();
+    const reports = await reportsRes.json();
+    applyStatus(status);
+    applyAlerts(alerts);
+    applyReports(reports);
+    errorCount = 0;
+    document.getElementById('live-dot').style.background  = 'var(--green)';
+    document.getElementById('live-dot').style.boxShadow   = '0 0 8px var(--green)';
+    document.getElementById('refresh-status').textContent =
+      'Live — refreshes every ' + refreshInterval + 's';
+  } catch (err) {
+    errorCount++;
+    document.getElementById('live-dot').style.background  = 'var(--red)';
+    document.getElementById('live-dot').style.boxShadow   = '0 0 8px var(--red)';
+    document.getElementById('refresh-status').textContent =
+      'Daemon offline — retrying…';
+  }
+}
+
+// Try to read refresh interval from config (injected by dashboard_server if needed)
+const META = window.__LP_CONFIG__ || {};
+refreshInterval = META.refresh_interval_seconds || 15;
+
+fetchAll();
+setInterval(fetchAll, refreshInterval * 1000);
+</script>
+</body>
+</html>

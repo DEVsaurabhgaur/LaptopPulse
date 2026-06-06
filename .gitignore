@@ -1,0 +1,59 @@
+# ============================================================
+# LaptopPulse .gitignore — NEVER commit these to GitHub
+# ============================================================
+
+# --- SECRETS (CRITICAL: never commit) ---
+.env
+*.key
+*.pem
+*.p12
+*.pfx
+config.enc
+secrets/
+api_keys.txt
+*.secret
+
+# --- User data (never commit log data) ---
+logs/
+reports/
+baseline.json
+trends.json
+events.json
+system_info.json
+AppData/
+
+# --- Build artifacts ---
+dist/
+build/
+*.spec
+*.exe
+*.msi
+
+# --- Python ---
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.egg-info/
+.eggs/
+.venv/
+venv/
+env/
+*.egg
+
+# --- IDE & editor ---
+.vscode/settings.json
+.idea/
+*.swp
+*.swo
+*.DS_Store
+Thumbs.db
+
+# --- Testing ---
+.pytest_cache/
+.coverage
+htmlcov/
+*.xml
+
+# --- PyInstaller ---
+*.spec

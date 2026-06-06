@@ -1,0 +1,84 @@
+{
+  "monitoring": {
+    "interval_seconds": 60,
+    "log_retention_days": 90,
+    "baseline_days": 7
+  },
+  "thresholds": {
+    "cpu_temp_critical": 90,
+    "cpu_temp_warning": 80,
+    "gpu_temp_critical": 88,
+    "gpu_temp_warning": 78,
+    "fan_rpm_dead": 200,
+    "fan_rpm_slow": 800,
+    "cpu_throttle_drop_percent": 30
+  },
+  "trend_detection": {
+    "idle_cpu_load_max": 15,
+    "idle_temp_rise_warn": 8,
+    "idle_temp_rise_critical": 12,
+    "fan_rpm_decline_warn_percent": 20,
+    "temp_trend_days": 30,
+    "fan_trend_days": 60,
+    "battery_health_warn_percent": 70
+  },
+  "reporting": {
+    "api_provider": "auto",
+    "model": "claude-sonnet-4-20250514",
+    "gemini_model": "gemini-1.5-flash",
+    "max_tokens": 1500,
+    "report_cooldown_hours": 24
+  },
+  "ui": {
+    "tray_tooltip": "LaptopPulse — Monitoring your laptop health",
+    "start_minimized": true,
+    "show_notifications": true
+  },
+  "health_score": {
+    "_comment": "Weights sum to 100. Bands are threshold values in respective units.",
+    "weights": {
+      "cpu_temp": 40,
+      "fan_rpm":  25,
+      "battery":  20,
+      "throttle": 15
+    },
+    "cpu_temp_bands": {
+      "healthy": 70,
+      "warn":    80,
+      "urgent":  89
+    },
+    "fan_rpm_bands": {
+      "healthy":  1200,
+      "warn":      800,
+      "critical":  200
+    },
+    "battery_health_bands": {
+      "healthy":  80,
+      "warn":     60,
+      "critical": 40
+    },
+    "alert_penalties": {
+      "IMMEDIATE": 20,
+      "URGENT":    10,
+      "WARN":       5,
+      "INFO":       0
+    },
+    "score_bands": {
+      "healthy": 85,
+      "monitor": 65,
+      "service": 45
+    }
+  },
+  "sqlite_db": {
+    "filename":    "laptoppulse.db",
+    "max_alerts":  1000,
+    "max_events":  5000,
+    "max_reports": 200
+  },
+  "dashboard": {
+    "port":                    5747,
+    "host":                    "127.0.0.1",
+    "auto_open_on_alert":      false,
+    "refresh_interval_seconds": 15
+  }
+}

@@ -1,0 +1,40 @@
+# LaptopPulse — Python Dependencies
+# Install all: pip install -r requirements.txt
+#
+# API keys (choose one or both — app auto-detects):
+#   Gemini (FREE):  https://aistudio.google.com/apikey  → key starts with AIza...
+#   Claude (paid):  https://console.anthropic.com       → key starts with sk-ant-...
+
+# ── Core system monitoring ────────────────────────────────────────────────────
+psutil==5.9.8                    # CPU load, battery, memory, fan (cross-platform)
+
+# ── AI Report Generation (dual API support) ──────────────────────────────────
+google-generativeai==0.7.2       # Gemini 1.5 Flash — FREE tier (recommended)
+anthropic==0.28.1                # Claude Sonnet — paid fallback
+
+# ── Encryption & Security ─────────────────────────────────────────────────────
+cryptography==42.0.8             # AES-256-GCM for API key storage
+
+# ── Windows Service & Tray ────────────────────────────────────────────────────
+pywin32==306                     # Windows Service registration + WMI COM bridge
+pystray==0.19.5                  # System tray icon
+Pillow==10.3.0                   # Tray icon image handling
+
+# ── LHM WMI bridge ───────────────────────────────────────────────────────────
+wmi==1.5.1                       # Python WMI wrapper — queries LibreHardwareMonitor
+                                 # namespace (root\LibreHardwareMonitor).
+                                 # Requires pywin32 (above) and LHM running as admin.
+
+# ── Local Dashboard ───────────────────────────────────────────────────────────
+Flask==3.0.3                     # Lightweight API server for ui/dashboard.html
+                                 # Runs on localhost:5747, daemon thread, zero overhead
+
+# ── Build & Packaging (dev only) ─────────────────────────────────────────────
+pyinstaller==6.7.0               # Package to .exe
+
+# ── Testing ───────────────────────────────────────────────────────────────────
+pytest==8.2.2
+pytest-cov==5.0.0
+
+# ── Dev utilities ─────────────────────────────────────────────────────────────
+python-dotenv==1.0.1             # Load .env file for dev overrides
