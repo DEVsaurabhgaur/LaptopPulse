@@ -25,7 +25,7 @@ import sys
 import threading
 from pathlib import Path
 
-__version__ = "1.1.0"
+__version__ = "1.0.0"
 
 
 # ── Logging setup ─────────────────────────────────────────────────────────────

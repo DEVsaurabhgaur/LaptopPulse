@@ -25,6 +25,7 @@ from core.storage.baseline   import baseline_exists, compute_and_save_baseline, 
 from core.storage.trends_calc import compute_trends, load_trends
 from core.detector.threshold import run_all_threshold_checks
 from core.detector.trend     import run_all_trend_checks
+from core.detector.rules     import Severity
 from core.storage.logger     import read_days
 
 logger = logging.getLogger(__name__)
@@ -219,7 +220,7 @@ def run_daemon():
             # 6. Generate AI report for highest-severity alert (with cooldown)
             if alerts and generate_report:
                 alerts.sort(
-                    key=lambda a: list(a.severity.__class__).index(a.severity)
+                    key=lambda a: list(Severity).index(a.severity)
                 )
                 top_alert = alerts[0]
                 report_path = generate_report(top_alert, system_info, trends or {})
