@@ -9,7 +9,7 @@
 ![Status](https://img.shields.io/badge/STATUS-BETA-00ff9f?style=flat-square&labelColor=0d0d1a)
 ![Platform](https://img.shields.io/badge/PLATFORM-WINDOWS%2010%2F11-00d4ff?style=flat-square&labelColor=0d0d1a)
 ![License](https://img.shields.io/badge/LICENSE-MIT-00ff9f?style=flat-square&labelColor=0d0d1a)
-![Python](https://img.shields.io/badge/PYTHON-3.11%2B-00d4ff?style=flat-square&labelColor=0d0d1a)
+![Python](https://img.shields.io/badge/PYTHON-3.10%2B-00d4ff?style=flat-square&labelColor=0d0d1a)
 ![CPU](https://img.shields.io/badge/CPU%20USAGE-%3C%200.3%25-00ff9f?style=flat-square&labelColor=0d0d1a)
 ![Privacy](https://img.shields.io/badge/PRIVACY-100%25%20LOCAL-00d4ff?style=flat-square&labelColor=0d0d1a)
 
@@ -45,7 +45,7 @@ LaptopPulse monitors your system 24/7 and fires an **AI-generated plain-language
 | ◈ | **AI Health Reports** | Plain-language reports via **Gemini (free)** or Claude. |
 | ◈ | **Live Dashboard** | Real-time metrics at `http://localhost:5747`. No account. |
 | ◈ | **0–100 Health Score** | Breakdown: CPU · Fan · Battery · Thermal throttle. |
-| ◈ | **Universal Compatibility** | Works on **all Windows 10/11 laptops** — not brand-locked. |
+| ◈ | **Universal Compatibility** | Works on **all Windows 10/11 laptops** — no extra software needed. |
 | ◈ | **100% Local** | Your data never leaves your machine. Ever. |
 | ◈ | **Encrypted Key Storage** | API keys secured with **AES-256-GCM** encryption. |
 
@@ -61,9 +61,11 @@ LaptopPulse monitors your system 24/7 and fires an **AI-generated plain-language
 <summary><b>[ 01 ] — DOWNLOAD &amp; INSTALL</b></summary>
 <br>
 
-Download `LaptopPulse-Setup.exe` from [**Releases →**](../../releases)
+Download `LaptopPulse.exe` from [**Releases →**](../../releases)
 
-Run the installer. LaptopPulse auto-starts with Windows — no extra config needed.
+Right-click → **Run as Administrator**. LaptopPulse starts silently in the system tray.
+
+> Admin rights are required to read CPU thermal sensors via Windows ACPI WMI.
 
 </details>
 
@@ -85,21 +87,7 @@ python save_gemini_key.py
 </details>
 
 <details>
-<summary><b>[ 03 ] — INSTALL LIBREHARDWAREMONITOR</b></summary>
-<br>
-
-LaptopPulse reads CPU + fan temperatures via **LibreHardwareMonitor (LHM)**.
-
-1. Download from [github.com/LibreHardwareMonitor](https://github.com/LibreHardwareMonitor/LibreHardwareMonitor)
-2. Run `LibreHardwareMonitor.exe` **as Administrator**
-3. Enable: `Options → Start Minimized` + `Run On Windows Startup`
-
-> Without LHM, falls back to Windows ACPI thermal zone (less accurate).
-
-</details>
-
-<details>
-<summary><b>[ 04 ] — OPEN DASHBOARD</b></summary>
+<summary><b>[ 03 ] — OPEN DASHBOARD</b></summary>
 <br>
 
 ```
@@ -140,8 +128,9 @@ Four-layer **event-driven design** — always watching, only fires when needed.
 | Component | Supported |
 |---|---|
 | CPU | ✅ Intel Core (all gen) / AMD Ryzen (all gen) |
-| GPU Temperature | ✅ NVIDIA GeForce (nvidia-smi) / AMD via LHM |
-| Fan RPM | ✅ All laptops with LHM support |
+| CPU Temperature | ✅ Windows ACPI WMI — **no external software needed** |
+| GPU Temperature | ✅ NVIDIA GeForce (nvidia-smi, pre-installed with driver) |
+| Fan RPM | ⚠️ Vendor EC-locked on most laptops — shown as N/A (expected) |
 | OS | ✅ Windows 10 / Windows 11 (64-bit) |
 
 ---
@@ -171,10 +160,17 @@ See [PRIVACY.md](PRIVACY.md) for the complete policy.
 
 ```bash
 # Clone repository
-git clone https://github.com/DEVsaurabhgaur/laptoppulse
-cd laptoppulse
+git clone https://github.com/DEVsaurabhgaur/LaptopPulse
+cd LaptopPulse
 pip install -r requirements.txt
 python main.py
+```
+
+> Run as Administrator for full sensor access.
+
+```bash
+# Build .exe
+python installer/build_exe.py
 
 # Run test suite
 pytest tests/ -v
