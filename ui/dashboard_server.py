@@ -80,6 +80,7 @@ def _make_app():
 
     @app.route("/api/reports")
     def api_reports():
+        # Retrieve index of generated AI plain English health reports
         try:
             from core.storage import sqlite_store
             reports = sqlite_store.get_recent_reports(20)
