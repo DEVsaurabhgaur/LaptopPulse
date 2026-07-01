@@ -57,3 +57,6 @@ htmlcov/
 
 # --- PyInstaller ---
 *.spec
+
+# --- Node ---
+node_modules/
