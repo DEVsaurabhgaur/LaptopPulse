@@ -69,6 +69,7 @@ def _make_app():
 
     @app.route("/api/alerts")
     def api_alerts():
+        # Query SQLite database for last 50 warning and health alerts
         try:
             from core.storage import sqlite_store
             alerts = sqlite_store.get_recent_alerts(50)
