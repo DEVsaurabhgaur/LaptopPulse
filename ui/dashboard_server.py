@@ -58,6 +58,7 @@ def _make_app():
 
     @app.route("/api/status")
     def api_status():
+        # Returns current laptop hardware health status and overall band level
         try:
             from core.storage import sqlite_store
             status = sqlite_store.get_latest_status()
