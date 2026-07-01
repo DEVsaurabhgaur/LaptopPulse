@@ -30,12 +30,28 @@ class _MockAlert:
 
 
 # Patch cfg import used inside health_score
-import types, unittest.mock as mock
+import types
+import pytest
 _fake_cfg   = types.SimpleNamespace(raw={})
-_fake_mod   = types.ModuleType("config.settings")
-_fake_mod.cfg = _fake_cfg
-sys.modules.setdefault("config",          types.ModuleType("config"))
-sys.modules["config.settings"] = _fake_mod
+
+_orig_config = sys.modules.get("config")
+_orig_settings = sys.modules.get("config.settings")
+
+@pytest.fixture(scope="module", autouse=True)
+def mock_config():
+    _fake_mod = types.ModuleType("config.settings")
+    _fake_mod.cfg = _fake_cfg
+    sys.modules["config"] = types.ModuleType("config")
+    sys.modules["config.settings"] = _fake_mod
+    yield
+    if _orig_config is not None:
+        sys.modules["config"] = _orig_config
+    else:
+        sys.modules.pop("config", None)
+    if _orig_settings is not None:
+        sys.modules["config.settings"] = _orig_settings
+    else:
+        sys.modules.pop("config.settings", None)
 
 from core import health_score as hs   # noqa: E402  — import after stub
 
