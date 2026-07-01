@@ -94,7 +94,9 @@ def _make_app():
         """Serve a generated HTML report by filename (not full path)."""
         try:
             from config.settings import get_reports_dir
-            report_path = get_reports_dir() / filename
+            import os
+            safe_filename = os.path.basename(filename)
+            report_path = get_reports_dir() / safe_filename
             if report_path.exists() and report_path.suffix == ".html":
                 return send_file(str(report_path))
         except Exception as exc:

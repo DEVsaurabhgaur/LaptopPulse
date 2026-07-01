@@ -5,6 +5,7 @@ Centralized settings manager for LaptopPulse.
 Loads defaults, overrides from .env, and manages encrypted API key storage.
 """
 
+import sys
 import json
 import os
 from pathlib import Path
@@ -39,7 +40,15 @@ def get_reports_dir() -> Path:
 
 # ── Default config loading ────────────────────────────────────────────────────
 
-_defaults_path = Path(__file__).parent / "defaults.json"
+def _get_config_dir() -> Path:
+    """Returns config/ dir — works both as script and PyInstaller .exe."""
+    if getattr(sys, "frozen", False) and hasattr(sys, "_MEIPASS"):
+        return Path(sys._MEIPASS) / "config"
+    return Path(__file__).parent
+
+
+_defaults_path = _get_config_dir() / "defaults.json"
+
 
 def load_defaults() -> dict:
     """Load default configuration from defaults.json."""
