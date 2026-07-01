@@ -41,6 +41,9 @@ def get_reports_dir() -> Path:
 # ── Default config loading ────────────────────────────────────────────────────
 
 def _get_config_dir() -> Path:
+    """
+    Locate app directory paths depending on execution mode (standalone script vs PyInstaller executable).
+    """
     """Returns config/ dir — works both as script and PyInstaller .exe."""
     if getattr(sys, "frozen", False) and hasattr(sys, "_MEIPASS"):
         return Path(sys._MEIPASS) / "config"
