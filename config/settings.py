@@ -51,6 +51,9 @@ _defaults_path = _get_config_dir() / "defaults.json"
 
 
 def load_defaults() -> dict:
+    """
+    Settings manager: provides helper functions to load settings from defaults.json and encrypt API keys.
+    """
     """Load default configuration from defaults.json."""
     with open(_defaults_path, "r") as f:
         return json.load(f)
