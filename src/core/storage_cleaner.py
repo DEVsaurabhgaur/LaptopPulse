@@ -1,0 +1,6 @@
+def format_bytes(num_bytes: int) -> str:
+    for unit in ['B','KB','MB','GB','TB']:
+        if abs(num_bytes) < 1024.0:
+            return f'{num_bytes:3.1f} {unit}'
+        num_bytes /= 1024.0
+    return f'{num_bytes:.1f} PB'
